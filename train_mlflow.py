@@ -3,8 +3,8 @@
 import argparse
 
 import mlflow
-import mlflow.sklearn
 import pandas as pd
+from mlflow.sklearn import log_model
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import (
     accuracy_score,
@@ -58,15 +58,15 @@ def run_trial(
         if not accuracy_only:
             mlflow.log_metrics(
                 {
-                    "precision": precision_score(y_test, predictions, zero_division=0),
-                    "recall": recall_score(y_test, predictions, zero_division=0),
-                    "f1": f1_score(y_test, predictions, zero_division=0),
+                    "precision": precision_score(y_test, predictions, zero_division="warn"),
+                    "recall": recall_score(y_test, predictions, zero_division="warn"),
+                    "f1": f1_score(y_test, predictions, zero_division="warn"),
                 }
             )
 
         # Explicitly use cloudpickle for compatibility with MLflow 3's
         # scikit-learn model serialization and this locally-created model.
-        mlflow.sklearn.log_model(
+        log_model(
             model,
             name="model",
             serialization_format="cloudpickle",
@@ -75,7 +75,7 @@ def run_trial(
         if accuracy_only:
             print(f"{name} -> accuracy : {accuracy:.3f}")
         else:
-            f1 = f1_score(y_test, predictions, zero_division=0)
+            f1 = f1_score(y_test, predictions, zero_division="warn")
             print(f"{name} -> accuracy : {accuracy:.3f} | f1 : {f1:.3f}")
 
 

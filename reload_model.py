@@ -1,10 +1,20 @@
 """Reload the best logged model and predict churn for an example customer."""
 
-import mlflow
-import mlflow.sklearn
+from typing import Any, Protocol, cast
+
 import pandas as pd
+from mlflow.sklearn import load_model
 
 from mlflow_lab import configure_mlflow, get_ranked_runs
+
+
+class FittedChurnModel(Protocol):
+    """The fitted sklearn model interface this script relies on."""
+
+    n_features_in_: int
+    feature_names_in_: Any
+
+    def predict(self, features: pd.DataFrame) -> Any: ...
 
 
 def main() -> None:
@@ -15,7 +25,7 @@ def main() -> None:
 
     best = ranked.iloc[0]
     run_id = best["run_id"]
-    model = mlflow.sklearn.load_model(f"runs:/{run_id}/model")
+    model = cast(FittedChurnModel, load_model(f"runs:/{run_id}/model"))
     print("Best run:", best["tags.mlflow.runName"], "| id:", run_id)
     print("Model reloaded:", type(model).__name__)
     print("Number of expected variables:", model.n_features_in_)
@@ -39,8 +49,11 @@ def main() -> None:
     if missing_features:
         raise ValueError(f"No values supplied for model features: {missing_features}")
 
-    customer = customer[expected_features]
-    prediction = model.predict(customer)[0]
+    customer_features: pd.DataFrame = customer.reindex(
+        columns=expected_features,
+        fill_value=0,
+    )
+    prediction = model.predict(customer_features)[0]
     print("Will the customer leave? ->", "YES" if prediction == 1 else "NO")
 
 

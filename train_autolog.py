@@ -1,8 +1,8 @@
 """Bonus: train a model while letting MLflow log it automatically."""
 
 import mlflow
-import mlflow.sklearn
 import pandas as pd
+from mlflow.sklearn import autolog
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 
@@ -25,7 +25,7 @@ def main() -> None:
         random_state=42,
     )
 
-    mlflow.sklearn.autolog(serialization_format="cloudpickle")
+    autolog(serialization_format="cloudpickle")
     with mlflow.start_run(run_name="trial-auto"):
         model = RandomForestClassifier(
             n_estimators=200,
