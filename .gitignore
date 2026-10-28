@@ -1,1 +1,7 @@
-venv
+venv/
+__pycache__/
+*.py[cod]
+
+# Generated MLflow tracking database and run artifacts
+mlruns/
+mlflow.db

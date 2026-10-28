@@ -1,0 +1,4 @@
+# MLflow 3.x is used for named logged models and cloudpickle serialization.
+mlflow>=3.0,<4
+pandas>=2.2,<4
+scikit-learn>=1.5,<2
